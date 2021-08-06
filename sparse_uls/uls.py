@@ -4,7 +4,6 @@ import numpy as np
 import scipy as sp
 import scipy.optimize
 
-from sparse_uls.lp import scipy_linprog, glpk_linprog
 from sparse_uls.util import linear_subspace, least_p
 
 
@@ -59,7 +58,7 @@ lp_method: Set[str] = {
 }
 
 
-def solve_l1(A: np.ndarray, b: np.ndarray, method: str = "GLPK") -> np.ndarray:
+def solve_l1(A: np.ndarray, b: np.ndarray) -> np.ndarray:
     """
     Minimizer of ||Ax+b||_1 using linear programming
     """
@@ -69,13 +68,13 @@ def solve_l1(A: np.ndarray, b: np.ndarray, method: str = "GLPK") -> np.ndarray:
     m, n = A.shape
 
     if not (m < n):
-        raise Exception("System must be underdetermined (m < n)")
+        raise Exception("System must be under-determined (m < n)")
 
-    A_ = np.empty(shape=(2 * n, 2 * n))
-    A_[0:n, 0:n] = +np.identity(n)
-    A_[n:2 * n, 0:n] = -np.identity(n)
-    A_[0:n, n:2 * n] = -np.identity(n)
-    A_[n:2 * n, n:2 * n] = -np.identity(n)
+    A_ub = np.empty(shape=(2 * n, 2 * n))
+    A_ub[0:n, 0:n] = +np.identity(n)
+    A_ub[n:2 * n, 0:n] = -np.identity(n)
+    A_ub[0:n, n:2 * n] = -np.identity(n)
+    A_ub[n:2 * n, n:2 * n] = -np.identity(n)
     b_ub = np.zeros(shape=(2 * n))
 
     c = np.empty(shape=(2 * n))
@@ -87,25 +86,15 @@ def solve_l1(A: np.ndarray, b: np.ndarray, method: str = "GLPK") -> np.ndarray:
     A_eq[:, n:2 * n] = 0
     b_eq = b
 
-    if method == "GLPK":
-        x1 = glpk_linprog(
-            c=c,
-            A=A_,
-            b_ub=b_ub,
-            A_eq=A_eq,
-            b_eq=b_eq,
-        )
-        return x1[0:n]
-
-    if method == "SCIPY":
-        x1 = scipy_linprog(
-            c=c,
-            A_ub=A_,
-            b_ub=b_ub,
-            A_eq=A_eq,
-            b_eq=b_eq,
-            bounds=[(None, None) for _ in range(2 * n)],
-        )
-        return x1[0:n]
-
-    raise Exception(f"lp method not available: see {lp_method}")
+    # linprog
+    solution = sp.optimize.linprog(
+        c=c,
+        A_ub=A_ub,
+        b_ub=b_ub,
+        A_eq=A_eq,
+        b_eq=b_eq,
+        bounds=[(None, None) for _ in range(2 * n)],
+        method="simplex",
+    )
+    x1 = solution.x
+    return x1[0:n]
