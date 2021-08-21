@@ -24,8 +24,8 @@ def norm_p(x: np.ndarray, p: float = 2.0) -> float:
     return np.sum(np.abs(x) ** p) ** (1 / p)
 
 
-n = 1000
-m = 200
+n = 2000
+m = 400
 A = np.random.random(size=(m, n)).astype(dtype=np.float64)
 b = np.random.random(size=(m)).astype(dtype=np.float64)
 
