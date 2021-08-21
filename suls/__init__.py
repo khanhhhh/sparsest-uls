@@ -1,4 +1,5 @@
 import numpy as np
+import pulp
 import scipy as sp
 import scipy.optimize
 
@@ -69,13 +70,24 @@ def linprog(c: np.ndarray, a_ub: np.ndarray, b_ub: np.ndarray, a_eq: np.ndarray,
     a_ub x \leq b_ub
     a_eq x = b_eq
     """
-    solution = sp.optimize.linprog(
-        c=c,
-        A_ub=a_ub,
-        b_ub=b_ub,
-        A_eq=a_eq,
-        b_eq=b_eq,
-        bounds=[(None, None) for _ in range(len(c))],
-        method="simplex",
-    )
-    return solution.x
+    model = pulp.LpProblem(name="", sense=pulp.LpMinimize)
+    # create variable
+    n = c.shape[0]
+    x = np.array([pulp.LpVariable(name=f"x_{i}]", cat=pulp.LpContinuous) for i in range(n)])
+    # add ub constraint
+    m_ub, n = a_ub.shape
+    for i in range(m_ub):
+        model.addConstraint(pulp.lpSum(a_ub[i, :] * x) <= b_ub[i])
+    # add eq constraint
+    m_eq, n = a_eq.shape
+    for i in range(m_eq):
+        model.addConstraint(pulp.lpSum(a_eq[i, :] * x) == b_eq[i])
+    # add objective
+    model.setObjective(pulp.lpSum(c * x))
+    # solve
+    status = model.solve()
+
+    if status != pulp.LpStatusOptimal:
+        raise RuntimeError(status)
+
+    return np.array([v.value() for v in x])
