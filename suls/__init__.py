@@ -57,14 +57,25 @@ def solve_l1(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     a_eq[:, n:2 * n] = 0
     b_eq = b
 
+    x1 = linprog(c=c, a_ub=a_ub, b_ub=b_ub, a_eq=a_eq, b_eq=b_eq)
+    return x1[0:n]
+
+
+def linprog(c: np.ndarray, a_ub: np.ndarray, b_ub: np.ndarray, a_eq: np.ndarray, b_eq: np.ndarray):
+    """
+    linprog: solve linear program
+    minimize c^T x
+    such that
+    a_ub x \leq b_ub
+    a_eq x = b_eq
+    """
     solution = sp.optimize.linprog(
         c=c,
         A_ub=a_ub,
         b_ub=b_ub,
         A_eq=a_eq,
         b_eq=b_eq,
-        bounds=[(None, None) for _ in range(2 * n)],
+        bounds=[(None, None) for _ in range(len(c))],
         method="simplex",
     )
-    x1 = solution.x
-    return x1[0:n]
+    return solution.x
