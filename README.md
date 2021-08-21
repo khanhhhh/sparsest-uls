@@ -47,15 +47,19 @@ Hence, the LP formulation yeilds the same solution as the original problem.
 
 ### L2 norm sparsity
 
-![norm2](https://raw.githubusercontent.com/khanhhhh/sparse-uls/main/assets/norm2.png)
+![norm2](https://raw.githubusercontent.com/khanhcsc/suls/main/assets/norm2.png)
 
-### L1.001 norm sparsity
+### L1.5 norm sparsity
 
-![norm1001](https://raw.githubusercontent.com/khanhhhh/sparse-uls/main/assets/norm1001.png)
+![norm15](https://raw.githubusercontent.com/khanhcsc/suls/main/assets/norm15.png)
+
+### L1.000001 norm sparsity
+
+![norm1000001](https://raw.githubusercontent.com/khanhcsc/suls/main/assets/norm1000001.png)
 
 ### L1 norm sparsity
 
-![norm1](https://raw.githubusercontent.com/khanhhhh/sparse-uls/main/assets/norm1.png)
+![norm1](https://raw.githubusercontent.com/khanhcsc/suls/main/assets/norm1.png)
 
 ## Packaging
 
